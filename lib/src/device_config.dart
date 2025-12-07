@@ -94,7 +94,7 @@ class DeviceConfig {
     name: 'Mobile',
     icon: Icons.phone_android_outlined,
     mode: DeviceMode.mobile,
-    width: 393,
+    width: 394,
     height: 852,
     devicePixelRatio: 3.0,
     borderRadius: 55.0,
@@ -152,6 +152,7 @@ class DeviceConfig {
   DeviceConfig copyWith({
     String? name,
     IconData? icon,
+    DeviceMode? mode,
     double? width,
     double? height,
     double? devicePixelRatio,
@@ -166,6 +167,7 @@ class DeviceConfig {
     return DeviceConfig(
       name: name ?? this.name,
       icon: icon ?? this.icon,
+      mode: mode ?? this.mode,
       width: width ?? this.width,
       height: height ?? this.height,
       devicePixelRatio: devicePixelRatio ?? this.devicePixelRatio,
