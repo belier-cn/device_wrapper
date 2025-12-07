@@ -55,6 +55,9 @@ class DeviceWrapper extends StatefulWidget {
   /// Grid line color for the area outside the device frame
   final Color? gridColor;
 
+  /// Device brightness (If the DeviceWrapper child is MaterialApp, set brightness)
+  final Brightness? brightness;
+
   /// Behavior when app is running on a mobile device (iOS/Android)
   /// - [MobileDeviceBehavior.alwaysShowFrame]: Always show device frame
   /// - [MobileDeviceBehavior.alwaysHideFrame]: Always render child directly
@@ -76,6 +79,7 @@ class DeviceWrapper extends StatefulWidget {
     this.enabled = true,
     this.backgroundColor = Colors.black,
     this.gridColor = const Color(0x1AFFFFFF),
+    this.brightness,
     this.mobileDeviceBehavior = MobileDeviceBehavior.showToggle,
   });
 
@@ -532,14 +536,13 @@ class _DeviceWrapperState extends State<DeviceWrapper>
   }
 
   Widget _buildHomeIndicator(DeviceConfig config) {
+    final brightness = widget.brightness ?? Theme.of(context).brightness;
     return Center(
       child: Container(
         width: _currentDevice.mode == DeviceMode.mobile ? 134 : 180,
         height: 5,
         decoration: BoxDecoration(
-          color: (Theme.of(context).brightness == Brightness.light
-                  ? Colors.black
-                  : Colors.white)
+          color: (brightness == Brightness.light ? Colors.black : Colors.white)
               .withValues(alpha: 0.3),
           borderRadius: BorderRadius.circular(3),
         ),
