@@ -1,5 +1,5 @@
 /// Device Wrapper Package
-/// 
+///
 /// A Flutter package to wrap pages with fixed device sizes (mobile/tablet)
 /// for web/desktop preview, simulating device emulator appearance.
 library device_wrapper;

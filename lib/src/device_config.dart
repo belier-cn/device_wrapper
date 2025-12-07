@@ -5,32 +5,32 @@ import 'device_mode.dart';
 class DeviceConfig {
   /// Width of the device frame (logical pixels / device points)
   final double width;
-  
+
   /// Height of the device frame (logical pixels / device points)
   final double height;
-  
+
   /// Device pixel ratio (scale factor for content)
   /// iPhone uses 3.0, iPad uses 2.0
   final double devicePixelRatio;
-  
+
   /// Border radius for the device frame
   final double borderRadius;
-  
+
   /// Border width for the device frame
   final double borderWidth;
-  
+
   /// Border color for the device frame
   final Color borderColor;
-  
+
   /// Background color behind the device frame
   final Color backgroundColor;
-  
+
   /// Shadow configuration for the device frame
   final List<BoxShadow> shadows;
-  
+
   /// Whether to show the device notch (for mobile)
   final bool showNotch;
-  
+
   /// Whether to show the home indicator
   final bool showHomeIndicator;
 
@@ -74,7 +74,7 @@ class DeviceConfig {
     showHomeIndicator: true,
   );
 
-  /// iPad Pro 11" / iPad Air configuration  
+  /// iPad Pro 11" / iPad Air configuration
   /// Physical resolution: 1668 x 2388 pixels @ 2x scale
   /// Logical resolution (device points): 834 x 1194
   /// Aspect ratio: ~1:1.43

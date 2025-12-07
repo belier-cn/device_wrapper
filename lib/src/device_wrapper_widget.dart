@@ -1,4 +1,5 @@
-import 'package:flutter/foundation.dart' show kIsWeb, TargetPlatform, defaultTargetPlatform;
+import 'package:flutter/foundation.dart'
+    show kIsWeb, TargetPlatform, defaultTargetPlatform;
 import 'package:flutter/material.dart';
 import 'device_mode.dart';
 import 'device_config.dart';
@@ -7,19 +8,19 @@ import 'device_config.dart';
 enum MobileDeviceBehavior {
   /// Always show the device frame wrapper
   alwaysShowFrame,
-  
+
   /// Always render child directly without frame
   alwaysHideFrame,
-  
+
   /// Show a toggle to let user choose
   showToggle,
 }
 
 /// A widget that wraps its child in a device frame with fixed dimensions.
-/// 
+///
 /// This is useful for previewing mobile/tablet layouts on web or desktop,
 /// simulating how the app would look on actual devices.
-/// 
+///
 /// Example usage:
 /// ```dart
 /// DeviceWrapper(
@@ -76,7 +77,7 @@ class DeviceWrapper extends StatefulWidget {
   State<DeviceWrapper> createState() => _DeviceWrapperState();
 }
 
-class _DeviceWrapperState extends State<DeviceWrapper> 
+class _DeviceWrapperState extends State<DeviceWrapper>
     with SingleTickerProviderStateMixin {
   late DeviceMode _currentMode;
   late AnimationController _animationController;
@@ -87,14 +88,14 @@ class _DeviceWrapperState extends State<DeviceWrapper>
   bool get _isOnMobileDevice {
     if (kIsWeb) return false;
     return defaultTargetPlatform == TargetPlatform.iOS ||
-           defaultTargetPlatform == TargetPlatform.android;
+        defaultTargetPlatform == TargetPlatform.android;
   }
 
   @override
   void initState() {
     super.initState();
     _currentMode = widget.initialMode;
-    
+
     // Set initial device frame visibility based on mobile behavior
     if (_isOnMobileDevice) {
       switch (widget.mobileDeviceBehavior) {
@@ -109,12 +110,12 @@ class _DeviceWrapperState extends State<DeviceWrapper>
           break;
       }
     }
-    
+
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-    
+
     _scaleAnimation = Tween<double>(begin: 1.0, end: 0.95).animate(
       CurvedAnimation(
         parent: _animationController,
@@ -131,7 +132,7 @@ class _DeviceWrapperState extends State<DeviceWrapper>
 
   void _toggleMode() async {
     await _animationController.forward();
-    
+
     setState(() {
       // Cycle through modes: mobile -> tablet -> screenOnly -> mobile
       switch (_currentMode) {
@@ -146,9 +147,9 @@ class _DeviceWrapperState extends State<DeviceWrapper>
           break;
       }
     });
-    
+
     widget.onModeChanged?.call(_currentMode);
-    
+
     await _animationController.reverse();
   }
 
@@ -196,27 +197,30 @@ class _DeviceWrapperState extends State<DeviceWrapper>
         builder: (context, constraints) {
           // Calculate scale factor to fit device within screen
           // Leave padding for toggle button (top) and device info (bottom)
-          final availableHeight = constraints.maxHeight - 100; // 50 top + 50 bottom padding
-          final availableWidth = constraints.maxWidth - 80; // 40 left + 40 right padding
-          
+          final availableHeight =
+              constraints.maxHeight - 100; // 50 top + 50 bottom padding
+          final availableWidth =
+              constraints.maxWidth - 80; // 40 left + 40 right padding
+
           final deviceTotalHeight = config.height + (config.borderWidth * 2);
           final deviceTotalWidth = config.width + (config.borderWidth * 2);
-          
+
           // Calculate scale to fit within available space
           final heightScale = availableHeight / deviceTotalHeight;
           final widthScale = availableWidth / deviceTotalWidth;
-          
+
           // Use the smaller scale to ensure device fits both dimensions
           // But don't scale up beyond 1.0
-          final scale = (heightScale < widthScale ? heightScale : widthScale).clamp(0.3, 1.0);
-          
+          final scale = (heightScale < widthScale ? heightScale : widthScale)
+              .clamp(0.3, 1.0);
+
           return Container(
             color: bgColor,
             child: Stack(
               children: [
                 // Background pattern
                 _buildBackgroundPattern(bgColor),
-                
+
                 // Device frame centered with auto-scaling
                 Center(
                   child: AnimatedBuilder(
@@ -230,7 +234,7 @@ class _DeviceWrapperState extends State<DeviceWrapper>
                     child: _buildDeviceFrame(config),
                   ),
                 ),
-                
+
                 // Mode toggle button
                 if (widget.showModeToggle)
                   Positioned(
@@ -238,15 +242,17 @@ class _DeviceWrapperState extends State<DeviceWrapper>
                     right: 20,
                     child: _buildModeToggle(),
                   ),
-                
+
                 // Hide device frame button (only on mobile with showToggle behavior)
-                if (_isOnMobileDevice && widget.mobileDeviceBehavior == MobileDeviceBehavior.showToggle)
+                if (_isOnMobileDevice &&
+                    widget.mobileDeviceBehavior ==
+                        MobileDeviceBehavior.showToggle)
                   Positioned(
                     top: 20,
                     left: 20,
                     child: _buildHideFrameButton(),
                   ),
-                
+
                 // Device info label
                 Positioned(
                   bottom: 20,
@@ -268,7 +274,7 @@ class _DeviceWrapperState extends State<DeviceWrapper>
       children: [
         // Render the actual app
         widget.child,
-        
+
         // Floating button to show device frame
         Positioned(
           bottom: 20,
@@ -285,7 +291,8 @@ class _DeviceWrapperState extends State<DeviceWrapper>
                 },
                 borderRadius: BorderRadius.circular(28),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   decoration: BoxDecoration(
                     color: const Color(0xFF1C1C1E).withValues(alpha: 0.9),
                     borderRadius: BorderRadius.circular(28),
@@ -399,7 +406,7 @@ class _DeviceWrapperState extends State<DeviceWrapper>
     if (_currentMode == DeviceMode.screenOnly) {
       return _buildScreenOnly(config);
     }
-    
+
     return AnimatedContainer(
       duration: const Duration(milliseconds: 400),
       curve: Curves.easeInOutCubic,
@@ -450,7 +457,7 @@ class _DeviceWrapperState extends State<DeviceWrapper>
               ),
             ),
           ),
-          
+
           // Dynamic Island (for iPhone 17 Pro style)
           if (config.showNotch && _currentMode == DeviceMode.mobile)
             Positioned(
@@ -459,7 +466,7 @@ class _DeviceWrapperState extends State<DeviceWrapper>
               right: 0,
               child: _buildDynamicIsland(config),
             ),
-          
+
           // Home indicator
           if (config.showHomeIndicator)
             Positioned(
@@ -468,7 +475,7 @@ class _DeviceWrapperState extends State<DeviceWrapper>
               right: 0,
               child: _buildHomeIndicator(config),
             ),
-          
+
           // Side buttons (volume, power)
           _buildSideButtons(config),
         ],
@@ -571,7 +578,7 @@ class _DeviceWrapperState extends State<DeviceWrapper>
 
   Widget _buildSideButtons(DeviceConfig config) {
     const buttonColor = Color(0xFF2a2a2e);
-    
+
     return Stack(
       children: [
         // Power button (right side) - iPhone style
@@ -690,7 +697,7 @@ class _DeviceWrapperState extends State<DeviceWrapper>
 
   Widget _buildModeButton(DeviceMode mode, IconData icon) {
     final isSelected = _currentMode == mode;
-    
+
     return GestureDetector(
       onTap: () {
         if (_currentMode != mode) {
@@ -701,7 +708,7 @@ class _DeviceWrapperState extends State<DeviceWrapper>
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected 
+          color: isSelected
               ? Colors.white.withValues(alpha: 0.2)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(25),

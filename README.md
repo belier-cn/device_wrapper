@@ -23,7 +23,7 @@ Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  device_wrapper: ^1.0.4
+  device_wrapper: ^1.0.5
 ```
 
 Then run:
