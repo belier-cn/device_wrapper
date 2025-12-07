@@ -44,7 +44,7 @@ class DeviceConfig {
   /// Whether to show the home indicator
   final bool showHomeIndicator;
 
-  ///
+  /// Device safe padding
   final EdgeInsets? safePadding;
 
   const DeviceConfig({
@@ -163,6 +163,8 @@ class DeviceConfig {
     List<BoxShadow>? shadows,
     bool? showNotch,
     bool? showHomeIndicator,
+    EdgeInsets? safePadding,
+    Color? gridColor,
   }) {
     return DeviceConfig(
       name: name ?? this.name,
@@ -178,6 +180,8 @@ class DeviceConfig {
       shadows: shadows ?? this.shadows,
       showNotch: showNotch ?? this.showNotch,
       showHomeIndicator: showHomeIndicator ?? this.showHomeIndicator,
+      safePadding: safePadding ?? this.safePadding,
+      gridColor: gridColor ?? this.gridColor,
     );
   }
 }
