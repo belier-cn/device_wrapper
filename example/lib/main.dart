@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:device_wrapper/device_wrapper.dart';
 import 'package:flutter/material.dart';
 
@@ -13,9 +15,17 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
-        valueListenable: themeModeNotifier,
-        builder: (BuildContext context, ThemeMode value, _) {
-          return MaterialApp(
+      valueListenable: themeModeNotifier,
+      builder: (BuildContext context, ThemeMode value, _) {
+        var brightness =
+            value == ThemeMode.light ? Brightness.light : Brightness.dark;
+        return DeviceWrapper(
+          showModeToggle: true,
+          brightness: brightness,
+          onModeChanged: (mode) {
+            debugPrint('Device mode changed to: ${mode.name}');
+          },
+          child: MaterialApp(
             title: 'Device Wrapper Demo',
             debugShowCheckedModeBanner: false,
             themeMode: value,
@@ -33,15 +43,11 @@ class MyApp extends StatelessWidget {
               ),
               useMaterial3: true,
             ).copyWith(scaffoldBackgroundColor: Colors.black),
-            home: DeviceWrapper(
-              showModeToggle: true,
-              onModeChanged: (mode) {
-                debugPrint('Device mode changed to: ${mode.name}');
-              },
-              child: const DemoHomePage(),
-            ),
-          );
-        });
+            home: const DemoHomePage(),
+          ),
+        );
+      },
+    );
   }
 }
 
@@ -141,40 +147,43 @@ class DemoHomePage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  GridView.count(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    crossAxisCount: 2,
-                    mainAxisSpacing: 12,
-                    crossAxisSpacing: 12,
-                    childAspectRatio: 1.2,
-                    children: [
-                      _buildFeatureCard(
-                        context: context,
-                        icon: Icons.dashboard,
-                        title: 'Dashboard',
-                        color: Colors.blue,
-                      ),
-                      _buildFeatureCard(
-                        context: context,
-                        icon: Icons.message,
-                        title: 'Messages',
-                        color: Colors.green,
-                      ),
-                      _buildFeatureCard(
-                        context: context,
-                        icon: Icons.settings,
-                        title: 'Settings',
-                        color: Colors.orange,
-                      ),
-                      _buildFeatureCard(
-                        context: context,
-                        icon: Icons.analytics,
-                        title: 'Analytics',
-                        color: Colors.purple,
-                      ),
-                    ],
-                  ),
+                  LayoutBuilder(builder: (context, constraints) {
+                    return GridView.count(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      crossAxisCount:
+                          math.max((constraints.maxWidth / 200).floor(), 2),
+                      mainAxisSpacing: 12,
+                      crossAxisSpacing: 12,
+                      childAspectRatio: 1.2,
+                      children: [
+                        _buildFeatureCard(
+                          context: context,
+                          icon: Icons.dashboard,
+                          title: 'Dashboard',
+                          color: Colors.blue,
+                        ),
+                        _buildFeatureCard(
+                          context: context,
+                          icon: Icons.message,
+                          title: 'Messages',
+                          color: Colors.green,
+                        ),
+                        _buildFeatureCard(
+                          context: context,
+                          icon: Icons.settings,
+                          title: 'Settings',
+                          color: Colors.orange,
+                        ),
+                        _buildFeatureCard(
+                          context: context,
+                          icon: Icons.analytics,
+                          title: 'Analytics',
+                          color: Colors.purple,
+                        ),
+                      ],
+                    );
+                  }),
                 ],
               ),
             ),

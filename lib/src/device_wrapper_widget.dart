@@ -50,10 +50,13 @@ class DeviceWrapper extends StatefulWidget {
   final bool enabled;
 
   /// Background color for the area outside the device frame
-  final Color? backgroundColor;
+  final Color backgroundColor;
 
   /// Grid line color for the area outside the device frame
   final Color? gridColor;
+
+  /// Default TextStyle for the area outside the device frame
+  final TextStyle textStyle;
 
   /// Device brightness (If the DeviceWrapper child is MaterialApp, set brightness)
   final Brightness? brightness;
@@ -67,12 +70,7 @@ class DeviceWrapper extends StatefulWidget {
   const DeviceWrapper({
     super.key,
     required this.child,
-    this.deviceList = const [
-      DeviceConfig.mobile,
-      DeviceConfig.tablet,
-      DeviceConfig.desktop,
-      DeviceConfig.screenOnly
-    ],
+    this.deviceList = DeviceConfig.deviceList,
     this.initialDevice,
     this.showModeToggle = true,
     this.onModeChanged,
@@ -80,6 +78,11 @@ class DeviceWrapper extends StatefulWidget {
     this.backgroundColor = Colors.black,
     this.gridColor = const Color(0x1AFFFFFF),
     this.brightness,
+    this.textStyle = const TextStyle(
+      color: Colors.white,
+      fontSize: 14,
+      fontWeight: FontWeight.w500,
+    ),
     this.mobileDeviceBehavior = MobileDeviceBehavior.showToggle,
   });
 
@@ -175,9 +178,7 @@ class _DeviceWrapperState extends State<DeviceWrapper>
     }
 
     final config = _currentDevice;
-    final bgColor = config.backgroundColor ??
-        widget.backgroundColor ??
-        Theme.of(context).scaffoldBackgroundColor;
+    final bgColor = config.backgroundColor ?? widget.backgroundColor;
 
     final gridColor = config.gridColor ?? widget.gridColor;
 
@@ -185,78 +186,82 @@ class _DeviceWrapperState extends State<DeviceWrapper>
     // since we're wrapping MaterialApp from outside
     return Directionality(
       textDirection: TextDirection.ltr,
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          // Calculate scale factor to fit device within screen
-          // Leave padding for toggle button (top) and device info (bottom)
-          final availableHeight =
-              constraints.maxHeight - 100; // 50 top + 50 bottom padding
-          final availableWidth =
-              constraints.maxWidth - 80; // 40 left + 40 right padding
+      child: DefaultTextStyle(
+        // Eliminate double underline warning on Text widgets
+        style: widget.textStyle,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            // Calculate scale factor to fit device within screen
+            // Leave padding for toggle button (top) and device info (bottom)
+            final availableHeight =
+                constraints.maxHeight - 100; // 50 top + 50 bottom padding
+            final availableWidth =
+                constraints.maxWidth - 80; // 40 left + 40 right padding
 
-          final deviceTotalHeight = config.height + (config.borderWidth * 2);
-          final deviceTotalWidth = config.width + (config.borderWidth * 2);
+            final deviceTotalHeight = config.height + (config.borderWidth * 2);
+            final deviceTotalWidth = config.width + (config.borderWidth * 2);
 
-          // Calculate scale to fit within available space
-          final heightScale = availableHeight / deviceTotalHeight;
-          final widthScale = availableWidth / deviceTotalWidth;
+            // Calculate scale to fit within available space
+            final heightScale = availableHeight / deviceTotalHeight;
+            final widthScale = availableWidth / deviceTotalWidth;
 
-          // Use the smaller scale to ensure device fits both dimensions
-          // But don't scale up beyond 1.0
-          final scale = (heightScale < widthScale ? heightScale : widthScale)
-              .clamp(0.3, 1.0);
+            // Use the smaller scale to ensure device fits both dimensions
+            // But don't scale up beyond 1.0
+            final scale = (heightScale < widthScale ? heightScale : widthScale)
+                .clamp(0.3, 1.0);
 
-          return Container(
-            color: bgColor,
-            child: Stack(
-              children: [
-                if (gridColor != null)
-                  // Background pattern
-                  _buildBackgroundPattern(bgColor, gridColor),
+            return Container(
+              color: bgColor,
+              child: Stack(
+                children: [
+                  if (gridColor != null)
+                    // Background pattern
+                    _buildBackgroundPattern(bgColor, gridColor),
 
-                // Device frame centered with auto-scaling
-                Center(
-                  child: AnimatedBuilder(
-                    animation: _scaleAnimation,
-                    builder: (context, child) {
-                      return Transform.scale(
-                        scale: _scaleAnimation.value * scale,
-                        child: child,
-                      );
-                    },
-                    child: _buildDeviceFrame(config),
+                  // Device frame centered with auto-scaling
+                  Center(
+                    child: AnimatedBuilder(
+                      animation: _scaleAnimation,
+                      builder: (context, child) {
+                        return Transform.scale(
+                          scale: _scaleAnimation.value * scale,
+                          child: child,
+                        );
+                      },
+                      child: _buildDeviceFrame(config),
+                    ),
                   ),
-                ),
 
-                // Mode toggle button
-                if (widget.showModeToggle)
+                  // Mode toggle button
+                  if (widget.showModeToggle)
+                    Positioned(
+                      top: 20,
+                      right: 20,
+                      child: _buildModeToggle(),
+                    ),
+
+                  // Hide device frame button (only on mobile with showToggle behavior)
+                  if (_isOnMobileDevice &&
+                      widget.mobileDeviceBehavior ==
+                          MobileDeviceBehavior.showToggle)
+                    Positioned(
+                      top: 20,
+                      left: 20,
+                      child: _buildHideFrameButton(),
+                    ),
+
+                  // Device info label
                   Positioned(
-                    top: 20,
-                    right: 20,
-                    child: _buildModeToggle(),
+                    bottom: 20,
+                    left: 0,
+                    right: 0,
+                    child: _buildDeviceInfoLabel(config),
                   ),
-
-                // Hide device frame button (only on mobile with showToggle behavior)
-                if (_isOnMobileDevice &&
-                    widget.mobileDeviceBehavior ==
-                        MobileDeviceBehavior.showToggle)
-                  Positioned(
-                    top: 20,
-                    left: 20,
-                    child: _buildHideFrameButton(),
-                  ),
-
-                // Device info label
-                Positioned(
-                  bottom: 20,
-                  left: 0,
-                  right: 0,
-                  child: _buildDeviceInfoLabel(config),
-                ),
-              ],
-            ),
-          );
-        },
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }
@@ -297,22 +302,17 @@ class _DeviceWrapperState extends State<DeviceWrapper>
                       ),
                     ],
                   ),
-                  child: const Row(
+                  child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
                         Icons.phone_iphone,
-                        color: Colors.white,
+                        color: widget.textStyle.color,
                         size: 20,
                       ),
-                      SizedBox(width: 8),
-                      Text(
+                      const SizedBox(width: 8),
+                      const Text(
                         'Show Device Frame',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                        ),
                       ),
                     ],
                   ),
@@ -349,22 +349,17 @@ class _DeviceWrapperState extends State<DeviceWrapper>
               ),
             ],
           ),
-          child: const Row(
+          child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
                 Icons.fullscreen_exit,
-                color: Colors.white,
+                color: widget.textStyle.color,
                 size: 20,
               ),
-              SizedBox(width: 8),
-              Text(
+              const SizedBox(width: 8),
+              const Text(
                 'Hide Frame',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
               ),
             ],
           ),
@@ -721,19 +716,14 @@ class _DeviceWrapperState extends State<DeviceWrapper>
           children: [
             Icon(
               device.icon,
-              color: isSelected ? Colors.white : Colors.white60,
+              color: isSelected
+                  ? widget.textStyle.color
+                  : widget.textStyle.color?.withValues(alpha: 0.6),
               size: 20,
             ),
             if (isSelected) ...[
               const SizedBox(width: 8),
-              Text(
-                device.name,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
+              Text(device.name),
             ],
           ],
         ),

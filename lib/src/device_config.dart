@@ -78,6 +78,14 @@ class DeviceConfig {
     this.showHomeIndicator = true,
   });
 
+  /// All DeviceConfig
+  static const List<DeviceConfig> deviceList = [
+    mobile,
+    tablet,
+    desktop,
+    screenOnly
+  ];
+
   /// iPhone 16 Pro configuration
   /// Physical resolution: 1179 x 2556 pixels @ 3x scale
   /// Logical resolution (device points): 393 x 852
